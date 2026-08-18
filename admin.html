@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ikram Jewellers | Inventory Management Console</title>
+    <!-- Brand Favicon -->
+    <link rel="shortcut icon" href="assets/logo.png" type="image/png">
+    
+    <!-- Google Fonts: Cormorant Garamond & Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Dashboard Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Admin-Specific Styles -->
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin-body">
+
+    <!-- Global Loading Splash Screen -->
+    <div id="adminLoadingScreen" class="admin-loading-screen">
+        <i class="fas fa-gem fa-spin"></i>
+        <h3>Security Validation...</h3>
+        <p>Verifying admin credentials</p>
+    </div>
+
+    <!-- Login Authentication View -->
+    <div id="loginScreen" class="auth-wrapper" style="display: none;">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <img src="assets/logo.png" alt="Ikram Jewellers Logo" class="logo-img">
+                <span class="logo-main">IKRAM JEWELLERS</span>
+                <span class="logo-sub">Inventory Console</span>
+            </div>
+            <h2>Admin Login</h2>
+            <p>Access inventory tracking and gold rate catalog sheets</p>
+            
+            <div id="loginError" class="alert-error">
+                <i class="fas fa-exclamation-triangle"></i> <span id="loginErrorText">Invalid Credentials.</span>
+            </div>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="admin@ikram-jewellers.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-lock-open"></i> Authenticate Console
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Authenticated Dashboard View -->
+    <div id="dashboardScreen" style="display: none;">
+        
+        <!-- Header & Navbar -->
+        <header class="admin-navbar">
+            <div class="admin-nav-container">
+                <div class="admin-logo">
+                    <img src="assets/logo.png" alt="Ikram Jewellers Logo">
+                    <div class="logo-area">
+                        <span class="logo-main" style="font-size: 1.2rem;">IKRAM JEWELLERS</span>
+                        <span class="logo-sub" style="font-size: 0.5rem;">Inventory Control</span>
+                    </div>
+                </div>
+                <div class="admin-user-menu">
+                    <span class="admin-email" id="adminUserEmail">admin@ikram-jewellers.com</span>
+                    <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="admin-container" style="display: grid; grid-template-columns: 260px 1fr; gap: 30px; align-items: start;">
+            
+            <!-- Sidebar Panel -->
+            <aside class="admin-sidebar" style="background: var(--admin-card); border: 1px solid var(--admin-border); border-radius: var(--border-radius); padding: 24px; display: flex; flex-direction: column; gap: 24px; position: sticky; top: 90px;">
+                <div class="sidebar-group">
+                    <h3 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--admin-gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="fas fa-gem"></i> Jewellery</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px;">
+                        <li><a href="#" class="sidebar-link active" id="linkAllJewellery" style="display: flex; align-items: center; gap: 10px; color: #ffffff; text-decoration: none; font-size: 0.85rem; padding: 10px 14px; border-radius: 6px; background: rgba(212, 175, 55, 0.1); font-weight: 500; transition: 0.3s;"><i class="fas fa-list"></i> All Jewellery</a></li>
+                        <li><a href="#" class="sidebar-link" id="linkShowJewellery" style="display: flex; align-items: center; gap: 10px; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; padding: 10px 14px; border-radius: 6px; font-weight: 500; transition: 0.3s;"><i class="fas fa-eye"></i> SHOW</a></li>
+                        <li><a href="#" class="sidebar-link" id="linkDontShowJewellery" style="display: flex; align-items: center; gap: 10px; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; padding: 10px 14px; border-radius: 6px; font-weight: 500; transition: 0.3s;"><i class="fas fa-eye-slash"></i> DON'T SHOW</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-group" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                    <h3 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--admin-gold); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="fas fa-cog"></i> Settings</h3>
+                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px;">
+                        <li><a href="#" class="sidebar-link" id="linkWebsiteSettings" style="display: flex; align-items: center; gap: 10px; color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; padding: 10px 14px; border-radius: 6px; font-weight: 500; transition: 0.3s;"><i class="fas fa-sliders-h"></i> Website Settings</a></li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Dashboard / Details Panels -->
+            <div class="admin-panels-container" style="display: flex; flex-direction: column; gap: 30px; width: 100%;">
+                
+                <!-- PANEL 1: Jewellery Management -->
+                <div id="panelJewelleryManagement">
+                    <!-- Welcome Header Row -->
+                    <div class="admin-header-row">
+                        <h1>
+                            <span>Console Overview</span>
+                            Jewellery Showcase Dashboard
+                        </h1>
+                        <button id="addNewProductBtn" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add New Jewellery
+                        </button>
+                    </div>
+
+                    <!-- Summary Stats Cards Row -->
+                    <div class="admin-stats-row">
+                        <!-- Card 1: Total -->
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>Total Items</h3>
+                                <span id="statTotalItems" class="stat-val">0</span>
+                            </div>
+                            <i class="fas fa-gem stat-icon"></i>
+                        </div>
+                        <!-- Card 2: SHOW -->
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>SHOW</h3>
+                                <span id="statListedItems" class="stat-val">0</span>
+                            </div>
+                            <i class="fas fa-eye stat-icon"></i>
+                        </div>
+                        <!-- Card 3: DON'T SHOW -->
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>DON'T SHOW</h3>
+                                <span id="statUnlistedItems" class="stat-val">0</span>
+                            </div>
+                            <i class="fas fa-eye-slash stat-icon"></i>
+                        </div>
+                        <!-- Card 4: Database Status -->
+                        <div class="stat-card">
+                            <div class="stat-info" style="display: flex; flex-direction: column;">
+                                <h3>System Tools</h3>
+                                <span id="databaseStatusLabel" class="stat-val" style="font-size: 1.1rem; margin-top: 5px;">Online</span>
+                            </div>
+                            <button id="seedDbBtn" class="btn btn-xs btn-seeder" style="display: none; margin-top: 10px;">
+                                <i class="fas fa-database"></i> Seed Default Catalog
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Table Card -->
+                    <div class="inventory-card">
+                        <div class="inventory-header">
+                            <h2 id="inventoryTableHeaderTitle">Showcase Inventory Log</h2>
+                            
+                            <div class="search-filter-row">
+                                <div class="search-wrapper">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="inventorySearch" placeholder="Search by name, ref, or purity...">
+                                </div>
+                                <div class="filter-wrapper">
+                                    <select id="inventoryFilter">
+                                        <option value="all">All Categories</option>
+                                        <option value="necklace">Necklaces</option>
+                                        <option value="ring">Rings</option>
+                                        <option value="bangle">Bangles & Karas</option>
+                                        <option value="earring">Earrings</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Products Table -->
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Ref Code</th>
+                                        <th>Title Name</th>
+                                        <th>Category</th>
+                                        <th>Weight</th>
+                                        <th>Base Price</th>
+                                        <th>Visibility</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryTableBody">
+                                    <!-- Populated dynamically by admin.js -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Empty Table Indicator -->
+                        <div id="emptyTableState" class="empty-table-state" style="display: none;">
+                            <i class="fas fa-gem"></i>
+                            <p>No jewellery items found. Add a product or click "Seed Default Catalog" above to begin.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL 2: Website Settings -->
+                <div id="panelWebsiteSettings" style="display: none;">
+                    <!-- Settings Header Row -->
+                    <div class="admin-header-row">
+                        <h1>
+                            <span>Customization Settings</span>
+                            Website Identity Settings
+                        </h1>
+                    </div>
+
+                    <div class="inventory-card">
+                        <form id="settingsForm" class="admin-form">
+                            <!-- Website Name -->
+                            <div class="form-group">
+                                <label for="settingsSiteName">Website Brand Name</label>
+                                <input type="text" id="settingsSiteName" class="form-control" placeholder="e.g. IKRAM JEWELLERS" required style="max-width: 500px;">
+                            </div>
+
+                            <!-- Website Logo Image URL -->
+                            <div class="form-group" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                                <label for="settingsSiteLogoUrl">Website Logo URL or Path</label>
+                                <input type="text" id="settingsSiteLogoUrl" class="form-control" placeholder="e.g. assets/logo.png or https://image.link/logo.png" required style="max-width: 500px; margin-bottom: 15px;">
+                                <div class="image-upload-wrapper">
+                                    <div class="image-preview-box" id="settingsLogoPreviewBox" style="width: 100px; height: 100px;">
+                                        <i class="far fa-image"></i>
+                                    </div>
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; max-width: 380px;">Paste a direct image link or local path. A live preview will load in the box on the left.</p>
+                                </div>
+                            </div>
+
+                            <!-- Website Favicon / Brand Icon URL -->
+                            <div class="form-group" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <label for="settingsSiteIconUrl">Brand Tab Icon / Favicon URL or Path</label>
+                                <input type="text" id="settingsSiteIconUrl" class="form-control" placeholder="e.g. assets/logo.png or https://image.link/favicon.png" required style="max-width: 500px; margin-bottom: 15px;">
+                                <div class="image-upload-wrapper">
+                                    <div class="image-preview-box" id="settingsIconPreviewBox" style="width: 60px; height: 60px;">
+                                        <i class="far fa-image"></i>
+                                    </div>
+                                    <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; max-width: 420px;">Paste a direct image link or local path. A live preview will load in the box on the left.</p>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                                <button type="submit" id="settingsSaveBtn" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Product Form Modal (Add / Edit) -->
+    <div id="productModal" class="modal-admin">
+        <div class="modal-admin-content">
+            <h3 id="modalFormTitle">Add New Product</h3>
+            
+            <form id="productForm" class="admin-form">
+                <!-- Hidden Product ID Field -->
+                <input type="hidden" id="prodId">
+                
+                <!-- Title Row -->
+                <div class="form-group">
+                    <label for="prodName">Jewellery Name</label>
+                    <input type="text" id="prodName" class="form-control" placeholder="e.g. Imperial Bridal Choker Set" required>
+                </div>
+
+                <!-- Specs row 1: Ref & Price -->
+                <div class="form-group-row" style="margin-bottom: 0;">
+                    <div class="form-group">
+                        <label for="prodRef">Reference Code</label>
+                        <input type="text" id="prodRef" class="form-control" placeholder="e.g. IJ-N09" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prodPrice">Base Price (PKR) <small>(0 = Price on Request)</small></label>
+                        <input type="number" id="prodPrice" class="form-control" placeholder="e.g. 150000" min="0" value="0">
+                    </div>
+                </div>
+
+                <!-- Specs row 2: Weight & Purity -->
+                <div class="form-group-row" style="margin-bottom: 0;">
+                    <div class="form-group">
+                        <label for="prodWeight">Estimated Weight</label>
+                        <input type="text" id="prodWeight" class="form-control" placeholder="e.g. 3.50 Tola or 25 Grams" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prodPurity">Metal Purity</label>
+                        <select id="prodPurity" class="form-control">
+                            <option value="24K Gold">24K Gold (Pure Bar)</option>
+                            <option value="22K Gold" selected>22K Gold (Standard)</option>
+                            <option value="21K Gold">21K Gold (Ornate)</option>
+                            <option value="18K Gold">18K Gold (Setting)</option>
+                            <option value="18K White Gold">18K White Gold</option>
+                            <option value="Diamond Solitaire">Diamond Settings</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Specs row 3: Category & Listed Toggle -->
+                <div class="form-group-row" style="margin-bottom: 0; align-items: center;">
+                    <div class="form-group">
+                        <label for="prodCategory">Category Group</label>
+                        <select id="prodCategory" class="form-control">
+                            <option value="necklace">Necklace</option>
+                            <option value="ring">Ring</option>
+                            <option value="bangle">Bangle & Kara</option>
+                            <option value="earring">Earring</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Public Visibility</label>
+                        <div style="display: flex; align-items: center; height: 46px;">
+                            <label class="switch">
+                                <input type="checkbox" id="prodListed" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span class="status-label listed" id="modalListedLabel">Listed</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="prodDesc">Detailed Craftsmanship Description</label>
+                    <textarea id="prodDesc" class="form-control" rows="3" placeholder="Describe diamond clarity, filigree styles, or precious stone details..." required></textarea>
+                </div>
+
+                <!-- Image URL Input Section -->
+                <div class="form-group">
+                    <label for="prodImageUrl">Jewellery Image URL or Path</label>
+                    <input type="text" id="prodImageUrl" class="form-control" placeholder="e.g. assets/necklace.jpg or https://image-link.com/photo.jpg" required>
+                    <div class="image-upload-wrapper" style="margin-top: 15px;">
+                        <div class="image-preview-box" id="modalImagePreviewBox">
+                            <i class="far fa-image"></i>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">Paste a direct image link or local path. A live preview will load in the box on the left.</p>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="form-btns-row">
+                    <button type="button" id="modalCancelBtn" class="btn btn-outline">Cancel</button>
+                    <button type="submit" id="modalSaveBtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dynamic Toast Notification Alerts -->
+    <div id="toastAlert" class="toast-msg">
+        <i class="fas" id="toastIcon"></i>
+        <span id="toastText">Operation successful.</span>
+    </div>
+
+    <!-- Firebase Compat Web Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
+    <!-- Shared configuration link -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Admin Operations JS -->
+    <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ikram Jewellers | Est. 1960 | Pure Gold & Diamond Jewelry Faisalabad</title>
+    <!-- Favicon / Brand Tab Icon -->
+    <link rel="shortcut icon" href="assets/logo.png" type="image/png">
+    <!-- Meta Descriptions for SEO -->
+    <meta name="description" content="Ikram Jewellers - Faisalabad. Established since 1960. Exquisite 24K, 22K, 21K gold and diamond jewelry. View live gold rates, calculate gold values, and book customized design appointments.">
+    <meta name="keywords" content="Ikram Jewellers, Gold rate Faisalabad, Gold rate today Pakistan, Faisalabad jewelers, Chase Up Plaza Satiyana Road, gold rate tola, bridal jewelry Pakistan">
+    
+    <!-- Google Fonts: Cormorant Garamond for elegant serif, Montserrat for clean body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header & Frosted Navbar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo-area">
+                <div class="logo-wrapper">
+                    <img src="assets/logo.png" alt="Ikram Jewellers Logo" class="logo-img">
+                    <div class="logo-text">
+                        <span class="logo-main">IKRAM JEWELLERS</span>
+                        <span class="logo-sub">EST. 1960 • GOLD & DIAMOND</span>
+                    </div>
+                </div>
+            </a>
+            
+            <nav class="nav-menu" id="navMenu">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#collection" class="nav-link">Collection</a>
+                <a href="#heritage" class="nav-link">Our Heritage</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </nav>
+            
+            <div class="nav-actions">
+                <a href="https://wa.me/923217624688" target="_blank" class="btn btn-whatsapp-nav">
+                    <i class="fab fa-whatsapp"></i> <span>Enquire</span>
+                </a>
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer Navigation -->
+    <div class="mobile-drawer" id="mobileDrawer">
+        <button class="drawer-close" id="drawerClose"><i class="fas fa-times"></i></button>
+        <a href="#home" class="drawer-link">Home</a>
+        <a href="#collection" class="drawer-link">Collection</a>
+        <a href="#heritage" class="drawer-link">Our Heritage</a>
+        <a href="#contact" class="drawer-link">Contact</a>
+        <a href="https://wa.me/923217624688" target="_blank" class="btn btn-whatsapp-drawer">
+            <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+        </a>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="hero-bg" style="background-image: url('assets/hero.jpg');"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="hero-tagline fade-in-up">Crafting Masterpieces Since 1960</span>
+            <h1 class="hero-title fade-in-up delay-1">Exquisite Gold &<br>Diamond Jewelry</h1>
+            <p class="hero-desc fade-in-up delay-2">Discover a legacy of pure gold bars, traditional craftsmanship, and timeless designs at Faisalabad's premier jewelry destination.</p>
+            <div class="hero-btns fade-in-up delay-3">
+                <a href="#collection" class="btn btn-primary">Explore Collection</a>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <span class="scroll-text">Scroll Down</span>
+            <div class="scroll-arrow"><i class="fas fa-chevron-down"></i></div>
+        </div>
+    </section>
+
+    <!-- Info Banner (Location & Quick Inquiry) -->
+    <section class="quick-info-banner">
+        <div class="info-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+                <h4>Our Location</h4>
+                <p>Chase Up Plaza, Satiyana Road, Faisalabad</p>
+            </div>
+        </div>
+        <div class="info-item">
+            <i class="fab fa-whatsapp"></i>
+            <div>
+                <h4>WhatsApp Inquiries</h4>
+                <p>+92 321 7624688</p>
+            </div>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-history"></i>
+            <div>
+                <h4>Legacy of Trust</h4>
+                <p>Serving over 6 decades</p>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+    <!-- Collection Section -->
+    <section id="collection" class="collection-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-subtitle">Exquisite Catalogue</span>
+                <h2 class="section-title">The Masterpiece Collection</h2>
+                <div class="divider"></div>
+            </div>
+
+            <!-- Collection Tabs -->
+            <div class="collection-tabs">
+                <button class="tab-btn active" data-filter="all">All Catalog</button>
+                <button class="tab-btn" data-filter="necklace">Necklaces</button>
+                <button class="tab-btn" data-filter="ring">Rings</button>
+                <button class="tab-btn" data-filter="bangle">Bangles & Karas</button>
+                <button class="tab-btn" data-filter="earring">Earrings</button>
+            </div>
+
+            <!-- Collection Grid -->
+            <div class="collection-grid" id="collectionGrid">
+                <!-- Loading State -->
+                <div class="collection-loading" id="collectionLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading our masterworks...</p>
+                </div>
+            </div>
+    </section>
+
+    <!-- Heritage / Story Section -->
+    <section id="heritage" class="heritage-section">
+        <div class="heritage-bg" style="background-image: url('assets/heritage_craft.jpg');"></div>
+        <div class="heritage-overlay"></div>
+        <div class="container">
+            <div class="heritage-grid">
+                <div class="heritage-text">
+                    <span class="section-subtitle gold-light">Our Heritage</span>
+                    <h2 class="section-title text-left">Established Since 1960</h2>
+                    <div class="divider gold-light"></div>
+                    <p class="heritage-para">For over six decades, Ikram Jewellers has stood as a beacon of unmatched craftsmanship, trust, and quality. Founded in Faisalabad, our brand has dressed generations of families in pure gold and brilliant diamonds, making every wedding, celebration, and legacy moment unforgettable.</p>
+                    <p class="heritage-para">We specialize in designing unique bespoke bridal sets, sourcing certified conflict-free diamonds, and offering accurate gold trading services. Our commitment to purity and customer satisfaction remains unchanged after 60 years of dedicated service.</p>
+                    <div class="heritage-badges">
+                        <div class="badge-item">
+                            <span class="badge-num">100%</span>
+                            <span class="badge-lbl">Purity Certified</span>
+                        </div>
+                        <div class="badge-item">
+                            <span class="badge-num">60+</span>
+                            <span class="badge-lbl">Years of Trust</span>
+                        </div>
+                        <div class="badge-item">
+                            <span class="badge-num">Bespoke</span>
+                            <span class="badge-lbl">Custom Designs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="heritage-deco-card">
+                    <i class="fas fa-gem gem-icon"></i>
+                    <h3>Crafted for Generations</h3>
+                    <p>"Quality is not an act, it is a lifelong habit. We don't just sell jewelry; we craft heritage pieces to be passed down through generations."</p>
+                    <div class="signature">Ikram Jewellers Team</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Appointment & Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="contact-grid">
+                <!-- Location details & Map simulated -->
+                <div class="contact-info-column">
+                    <span class="section-subtitle">Visit Our Showroom</span>
+                    <h2 class="section-title text-left">Connect With Us</h2>
+                    <div class="divider"></div>
+                    
+                    <p class="contact-desc">We welcome you to visit our luxury showroom in Faisalabad for bespoke custom design consultations, live valuations, or jewelry purchases.</p>
+                    
+                    <div class="contact-cards">
+                        <div class="c-card">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>Showroom Address</h4>
+                                <p>📍 Chase Up Plaza, Satiyana Road, Faisalabad, Pakistan</p>
+                            </div>
+                        </div>
+                        <div class="c-card">
+                            <i class="fab fa-whatsapp"></i>
+                            <div>
+                                <h4>Inquiries & Support</h4>
+                                <p>📲 +92 321 7624688 (WhatsApp Chat)</p>
+                            </div>
+                        </div>
+                        <div class="c-card">
+                            <i class="far fa-clock"></i>
+                            <div>
+                                <h4>Operating Hours</h4>
+                                <p>Monday – Saturday: 11:30 AM – 9:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Elegant Map with Faisalabad Details -->
+                    <div class="simulated-map">
+                        <div class="map-overlay">
+                            <i class="fas fa-map-marked-alt map-pin-icon"></i>
+                            <div class="map-info">
+                                <strong>📍 Ikram Jewellers</strong>
+                                <span>Chase Up Plaza, Satiyana Rd, Faisalabad</span>
+                                <a href="https://maps.google.com/?q=Chase+Up+Plaza+Satiyana+Road+Faisalabad" target="_blank" class="btn btn-xs btn-primary">Get Directions</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointment Booking Form -->
+                <div class="appointment-form-container">
+                    <h3>Schedule a VIP Appointment</h3>
+                    <p>Book a private consultation slot with our master jewelers for bespoke bridal sets or large valuations.</p>
+                    <div class="divider gold-light"></div>
+                    
+                    <form id="appointmentForm" class="appointment-form">
+                        <div class="form-group">
+                            <label for="apptName">Full Name</label>
+                            <input type="text" id="apptName" class="form-control" placeholder="Enter your name" required>
+                        </div>
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="apptPhone">WhatsApp Number</label>
+                                <input type="tel" id="apptPhone" class="form-control" placeholder="e.g. +923217624688" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="apptPurpose">Purpose of Visit</label>
+                                <select id="apptPurpose" class="form-control">
+                                    <option value="Custom Bridal Set Design">Custom Bridal Set Design</option>
+                                    <option value="Bespoke Ring/Earrings">Bespoke Ring/Earrings</option>
+                                    <option value="Gold Bar Purchase/Lock-in">Gold Bar Purchase/Lock-in</option>
+                                    <option value="Gold Value Evaluation">Gold Valuation / Selling</option>
+                                    <option value="General Showcase Viewing">Showroom Viewing</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label for="apptDate">Preferred Date</label>
+                                <input type="date" id="apptDate" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="apptTime">Preferred Time</label>
+                                <select id="apptTime" class="form-control" required>
+                                    <option value="12:00 PM">12:00 PM (Noon)</option>
+                                    <option value="02:00 PM">02:00 PM</option>
+                                    <option value="04:00 PM">04:00 PM</option>
+                                    <option value="06:00 PM">06:00 PM</option>
+                                    <option value="08:00 PM">08:00 PM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="apptNotes">Special Requests / Notes</label>
+                            <textarea id="apptNotes" class="form-control" rows="3" placeholder="Any specific requirements..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fab fa-whatsapp"></i> Book Appointment via WhatsApp
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo-wrapper" style="margin-bottom: 12px;">
+                        <img src="assets/logo.png" alt="Ikram Jewellers Logo" class="logo-img">
+                        <span class="logo-main">IKRAM JEWELLERS</span>
+                    </div>
+                    <p class="brand-tag">Pure Gold & Diamonds. Sourcing luxury and trust since 1960. Located in the heart of Faisalabad.</p>
+                    <div class="social-links">
+                        <a href="https://www.threads.net/@ikram.jewellers" target="_blank" title="Threads"><i class="fab fa-threads"></i></a>
+                        <a href="https://www.instagram.com/ikram.jewellers" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://wa.me/923217624688" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#collection">Showcase Gallery</a></li>
+                        <li><a href="#heritage">Our History</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-contact">
+                    <h4>Direct Contact</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> Chase Up Plaza, Satiyana road, Faisalabad</p>
+                    <p><i class="fab fa-whatsapp"></i> +92 321 7624688</p>
+                    <p><i class="far fa-envelope"></i> contact@ikram-jewellers.com</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 Ikram Jewellers. All Rights Reserved. Established 1960. Designed with luxury.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Collection Quick View Modal -->
+    <div class="modal" id="quickViewModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            <div class="modal-grid">
+                <div class="modal-img-area">
+                    <img id="modalImg" src="" alt="Selected Jewelry Item">
+                </div>
+                <div class="modal-info-area">
+                    <span class="modal-meta" id="modalMeta">22K Gold</span>
+                    <h3 class="modal-title" id="modalTitle">Product Title</h3>
+                    <div class="divider"></div>
+                    <p class="modal-desc" id="modalDesc">Detailed description of craftsmanship, design notes, and customization details for this premium item.</p>
+                    
+                    <div class="modal-spec-list">
+                        <div class="spec-row">
+                            <span>Reference Code:</span>
+                            <strong id="modalRef">IJ-J001</strong>
+                        </div>
+                        <div class="spec-row">
+                            <span>Estimated Weight:</span>
+                            <strong id="modalWeight">5.50 Tola</strong>
+                        </div>
+                        <div class="spec-row">
+                            <span>Metal Purity:</span>
+                            <strong id="modalPurity">22K Gold</strong>
+                        </div>
+                        <div class="spec-row">
+                            <span>Availability:</span>
+                            <strong id="modalAvailability" class="text-gold">Made to Order</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-action-row">
+                        <a href="" id="modalWhatsappBtn" target="_blank" class="btn btn-primary">
+                            <i class="fab fa-whatsapp"></i> Order / Enquire on WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>
