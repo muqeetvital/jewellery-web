@@ -257,43 +257,65 @@ function bindQuickViewToCards() {
     });
 }
 
-// 7a. Firebase Loading & Fallbacks
+// 7a. Supabase Loading & Fallbacks
 let unsubscribeProducts = null;
 
-function loadProducts() {
+async function loadProducts() {
     const grid = document.getElementById("collectionGrid");
     if (!grid) return;
 
-    if (window.firebaseConfigured && window.db) {
-        // Clear any existing listener
-        if (unsubscribeProducts) {
-            unsubscribeProducts();
-        }
+    if (window.supabaseConfigured && window.supabaseClient) {
+        try {
+            // Fetch listed products
+            const { data: products, error } = await window.supabaseClient
+                .from("products")
+                .select("*")
+                .eq("listed", true)
+                .order("createdAt", { ascending: false });
 
-        unsubscribeProducts = db.collection("products")
-            .where("listed", "==", true)
-            .onSnapshot(querySnapshot => {
-                const products = [];
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    products.push({
-                        id: doc.id,
-                        ...data
-                    });
-                });
-                
-                if (products.length === 0) {
-                    renderEmptyCollection();
-                } else {
-                    renderCatalog(products);
-                }
-            }, error => {
-                console.error("Firestore real-time subscription error:", error);
-                // Fallback to local on initial load failure
-                if (Object.keys(catalogItems).length === 0) {
-                    loadLocalFallback();
-                }
-            });
+            if (error) throw error;
+
+            if (!products || products.length === 0) {
+                renderEmptyCollection();
+            } else {
+                renderCatalog(products);
+            }
+
+            // Realtime postgres updates subscription
+            if (!unsubscribeProducts) {
+                const channel = window.supabaseClient
+                    .channel("products_realtime")
+                    .on(
+                        "postgres_changes",
+                        { event: "*", schema: "public", table: "products" },
+                        async () => {
+                            const { data: updatedProducts, error: updateError } = await window.supabaseClient
+                                .from("products")
+                                .select("*")
+                                .eq("listed", true)
+                                .order("createdAt", { ascending: false });
+                            if (!updateError && updatedProducts) {
+                                if (updatedProducts.length === 0) {
+                                    renderEmptyCollection();
+                                } else {
+                                    renderCatalog(updatedProducts);
+                                }
+                            }
+                        }
+                    )
+                    .subscribe();
+
+                unsubscribeProducts = () => {
+                    window.supabaseClient.removeChannel(channel);
+                };
+            }
+        } catch (error) {
+            console.error("Supabase loadProducts error:", error);
+            // Fallback to local on initial load failure
+            if (Object.keys(catalogItems).length === 0) {
+                loadLocalFallback();
+            }
+        }
     } else {
         loadLocalFallback();
     }
@@ -473,17 +495,36 @@ function formatNumber(number) {
 }
 
 // 10. Dynamic Brand and Website Settings Loader
-function loadSiteSettings() {
-    if (window.firebaseConfigured && window.db) {
-        db.collection("settings").doc("site")
-            .onSnapshot(doc => {
-                if (doc.exists) {
-                    const settings = doc.data();
-                    applySiteSettings(settings);
-                }
-            }, error => {
-                console.error("Firestore settings real-time subscription error:", error);
-            });
+async function loadSiteSettings() {
+    if (window.supabaseConfigured && window.supabaseClient) {
+        try {
+            // Load initial settings
+            const { data: settings, error } = await window.supabaseClient
+                .from("settings")
+                .select("*")
+                .eq("key", "site")
+                .single();
+
+            if (!error && settings) {
+                applySiteSettings(settings);
+            }
+
+            // Realtime postgres changes subscription
+            window.supabaseClient
+                .channel("settings_realtime")
+                .on(
+                    "postgres_changes",
+                    { event: "*", schema: "public", table: "settings", filter: "key=eq.site" },
+                    (payload) => {
+                        if (payload.new) {
+                            applySiteSettings(payload.new);
+                        }
+                    }
+                )
+                .subscribe();
+        } catch (err) {
+            console.error("Supabase loadSiteSettings error:", err);
+        }
     }
 }
 

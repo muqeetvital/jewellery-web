@@ -223,27 +223,45 @@
                                 <input type="text" id="settingsSiteName" class="form-control" placeholder="e.g. IKRAM JEWELLERS" required style="max-width: 500px;">
                             </div>
 
-                            <!-- Website Logo Image URL -->
+                            <!-- Website Logo Image Upload -->
                             <div class="form-group" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-                                <label for="settingsSiteLogoUrl">Website Logo URL or Path</label>
-                                <input type="text" id="settingsSiteLogoUrl" class="form-control" placeholder="e.g. assets/logo.png or https://image.link/logo.png" required style="max-width: 500px; margin-bottom: 15px;">
+                                <label>Website Logo Image</label>
                                 <div class="image-upload-wrapper">
                                     <div class="image-preview-box" id="settingsLogoPreviewBox" style="width: 100px; height: 100px;">
                                         <i class="far fa-image"></i>
                                     </div>
-                                    <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; max-width: 380px;">Paste a direct image link or local path. A live preview will load in the box on the left.</p>
+                                    <div>
+                                        <div class="file-input-btn-wrapper">
+                                            <button type="button" class="btn-file-select">Upload New Logo</button>
+                                            <input type="file" id="settingsSiteLogoFile" accept="image/*">
+                                        </div>
+                                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px;">Upload high-quality PNG or JPG brand logo.</p>
+                                    </div>
+                                </div>
+                                <!-- Upload Progress -->
+                                <div class="upload-progress-container" id="logoUploadProgressContainer" style="margin-top: 10px; max-width: 500px; display: none;">
+                                    <div class="upload-progress-bar" id="logoUploadProgressBar"></div>
                                 </div>
                             </div>
 
-                            <!-- Website Favicon / Brand Icon URL -->
+                            <!-- Website Favicon / Brand Icon Upload -->
                             <div class="form-group" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                <label for="settingsSiteIconUrl">Brand Tab Icon / Favicon URL or Path</label>
-                                <input type="text" id="settingsSiteIconUrl" class="form-control" placeholder="e.g. assets/logo.png or https://image.link/favicon.png" required style="max-width: 500px; margin-bottom: 15px;">
+                                <label>Brand Tab Icon / Favicon</label>
                                 <div class="image-upload-wrapper">
                                     <div class="image-preview-box" id="settingsIconPreviewBox" style="width: 60px; height: 60px;">
                                         <i class="far fa-image"></i>
                                     </div>
-                                    <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; max-width: 420px;">Paste a direct image link or local path. A live preview will load in the box on the left.</p>
+                                    <div>
+                                        <div class="file-input-btn-wrapper">
+                                            <button type="button" class="btn-file-select">Upload New Icon</button>
+                                            <input type="file" id="settingsSiteIconFile" accept="image/*">
+                                        </div>
+                                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px;">Upload 1:1 square icon (under 2MB).</p>
+                                    </div>
+                                </div>
+                                <!-- Upload Progress -->
+                                <div class="upload-progress-container" id="iconUploadProgressContainer" style="margin-top: 10px; max-width: 500px; display: none;">
+                                    <div class="upload-progress-bar" id="iconUploadProgressBar"></div>
                                 </div>
                             </div>
 
@@ -337,15 +355,24 @@
                     <textarea id="prodDesc" class="form-control" rows="3" placeholder="Describe diamond clarity, filigree styles, or precious stone details..." required></textarea>
                 </div>
 
-                <!-- Image URL Input Section -->
+                <!-- Image Upload Section -->
                 <div class="form-group">
-                    <label for="prodImageUrl">Jewellery Image URL or Path</label>
-                    <input type="text" id="prodImageUrl" class="form-control" placeholder="e.g. assets/necklace.jpg or https://image-link.com/photo.jpg" required>
-                    <div class="image-upload-wrapper" style="margin-top: 15px;">
+                    <label>Jewellery Image Asset</label>
+                    <div class="image-upload-wrapper">
                         <div class="image-preview-box" id="modalImagePreviewBox">
                             <i class="far fa-image"></i>
                         </div>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">Paste a direct image link or local path. A live preview will load in the box on the left.</p>
+                        <div>
+                            <div class="file-input-btn-wrapper">
+                                <button type="button" class="btn-file-select">Choose Image File</button>
+                                <input type="file" id="prodImageFile" accept="image/*">
+                            </div>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px;">Upload high-quality PNG or JPG square image (under 5MB).</p>
+                        </div>
+                    </div>
+                    <!-- Upload Progress -->
+                    <div class="upload-progress-container" id="uploadProgressContainer" style="margin-top: 15px; display: none;">
+                        <div class="upload-progress-bar" id="uploadProgressBar"></div>
                     </div>
                 </div>
 
@@ -366,15 +393,11 @@
         <span id="toastText">Operation successful.</span>
     </div>
 
-    <!-- Firebase Compat Web Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+    <!-- Supabase JS Client Library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- Shared configuration link -->
-    <script src="firebase-config.js"></script>
+    <script src="supabase-config.js"></script>
 
     <!-- Admin Operations JS -->
     <script src="admin.js"></script>

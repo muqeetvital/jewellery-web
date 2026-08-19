@@ -102,7 +102,7 @@ const defaultShowcaseSeed = [
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
-    checkFirebaseStatus();
+    checkSupabaseStatus();
     initAuthObserver();
     initModalControls();
     initFormHandlers();
@@ -111,17 +111,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // 1. Check Configuration Status
-function checkFirebaseStatus() {
+function checkSupabaseStatus() {
     const splashScreen = document.getElementById("adminLoadingScreen");
-    if (!window.firebaseConfigured) {
+    if (!window.supabaseConfigured) {
         splashScreen.innerHTML = `
             <i class="fas fa-exclamation-triangle" style="color: #ff5252;"></i>
             <h3 style="color: #ffffff; margin-top: 15px;">Configuration Incomplete</h3>
             <p style="color: #b5b5b5; max-width: 400px; text-align: center; margin-top: 10px; font-size: 0.9rem;">
-                Firebase database configurations are not set yet. Please update the credential variables inside the <strong>firebase-config.js</strong> file.
+                Supabase database configurations are not set yet. Please update the credential variables inside the <strong>supabase-config.js</strong> file.
             </p>
         `;
-        throw new Error("Firebase configuration placeholders remain. Admin execution stopped.");
+        throw new Error("Supabase configuration placeholders remain. Admin execution stopped.");
     }
 }
 
@@ -134,45 +134,53 @@ function initAuthObserver() {
     const loginError = document.getElementById("loginError");
     const loginErrorText = document.getElementById("loginErrorText");
 
-    window.auth.onAuthStateChanged(user => {
-        if (user) {
-            // Fetch user role document from Firestore to verify admin privileges
-            window.db.collection("users").doc(user.uid).get()
-                .then(doc => {
-                    // Hide splash screen
-                    splashScreen.style.display = "none";
+    if (!window.supabaseConfigured || !window.supabaseClient) {
+        splashScreen.style.display = "none";
+        return;
+    }
 
-                    if (doc.exists && doc.data().isAdmin === true) {
-                        // User is authorized admin
-                        loginScreen.style.display = "none";
-                        dashboardScreen.style.display = "block";
-                        adminEmailField.textContent = user.email;
-                        
-                        // Fetch and render settings & inventory
-                        loadAdminSiteSettings();
-                        loadInventory();
-                    } else {
-                        // User logged in but lacks admin profile
-                        console.warn("User lacks admin role profile in users collection.");
-                        window.auth.signOut().then(() => {
-                            loginScreen.style.display = "flex";
-                            dashboardScreen.style.display = "none";
-                            loginErrorText.textContent = "Access Denied: This account is not whitelisted as an administrator.";
-                            loginError.style.display = "block";
-                            showToast("Access Denied: Admin role required", "error");
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error("Verification error:", error);
-                    splashScreen.style.display = "none";
-                    window.auth.signOut().then(() => {
-                        loginScreen.style.display = "flex";
-                        dashboardScreen.style.display = "none";
-                        loginErrorText.textContent = "Security validation failed: " + error.message;
-                        loginError.style.display = "block";
-                    });
-                });
+    window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        const user = session ? session.user : null;
+        
+        if (user) {
+            try {
+                // Fetch admin check from users table
+                const { data: userData, error: userError } = await window.supabaseClient
+                    .from("users")
+                    .select("isAdmin")
+                    .eq("id", user.id)
+                    .single();
+
+                splashScreen.style.display = "none";
+
+                if (!userError && userData && userData.isAdmin === true) {
+                    // User is authorized admin
+                    loginScreen.style.display = "none";
+                    dashboardScreen.style.display = "block";
+                    adminEmailField.textContent = user.email;
+                    
+                    // Fetch and render settings & inventory
+                    loadAdminSiteSettings();
+                    loadInventory();
+                } else {
+                    // User lacks admin privileges
+                    console.warn("User lacks admin role profile in users table.");
+                    await window.supabaseClient.auth.signOut();
+                    loginScreen.style.display = "flex";
+                    dashboardScreen.style.display = "none";
+                    loginErrorText.textContent = "Access Denied: This account is not whitelisted as an administrator.";
+                    loginError.style.display = "block";
+                    showToast("Access Denied: Admin role required", "error");
+                }
+            } catch (err) {
+                console.error("Verification error:", err);
+                splashScreen.style.display = "none";
+                await window.supabaseClient.auth.signOut();
+                loginScreen.style.display = "flex";
+                dashboardScreen.style.display = "none";
+                loginErrorText.textContent = "Security validation failed: " + err.message;
+                loginError.style.display = "block";
+            }
         } else {
             splashScreen.style.display = "none";
             dashboardScreen.style.display = "none";
@@ -190,31 +198,37 @@ function initFormHandlers() {
     const productForm = document.getElementById("productForm");
 
     // Login Form Submit
-    loginForm.addEventListener("submit", (e) => {
+    loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value;
 
         loginError.style.display = "none";
 
-        window.auth.signInWithEmailAndPassword(email, password)
-            .then(() => {
-                showToast("Login authorized successfully", "success");
-                loginForm.reset();
-            })
-            .catch(error => {
-                console.error("Auth error:", error);
-                loginErrorText.textContent = error.message;
-                loginError.style.display = "block";
-                showToast("Access Denied: Invalid Credentials", "error");
+        try {
+            const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+                email,
+                password
             });
+            if (error) throw error;
+            showToast("Login authorized successfully", "success");
+            loginForm.reset();
+        } catch (error) {
+            console.error("Auth error:", error);
+            loginErrorText.textContent = error.message;
+            loginError.style.display = "block";
+            showToast("Access Denied: Invalid Credentials", "error");
+        }
     });
 
     // Logout Click
-    logoutBtn.addEventListener("click", () => {
-        window.auth.signOut().then(() => {
+    logoutBtn.addEventListener("click", async () => {
+        try {
+            await window.supabaseClient.auth.signOut();
             showToast("Log out completed successfully", "success");
-        });
+        } catch (err) {
+            showToast("Logout failed: " + err.message, "error");
+        }
     });
 
     // Product Add/Edit Form Submit
@@ -302,16 +316,19 @@ function loadInventory() {
         </tr>
     `;
 
-    window.db.collection("products")
-        .get()
-        .then(querySnapshot => {
-            currentProducts = [];
-            querySnapshot.forEach(doc => {
-                currentProducts.push({
-                    id: doc.id,
-                    ...doc.data()
-                });
-            });
+    if (!window.supabaseConfigured || !window.supabaseClient) {
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #ff5252;">Supabase configuration missing</td></tr>`;
+        return;
+    }
+
+    window.supabaseClient
+        .from("products")
+        .select("*")
+        .order("createdAt", { ascending: false })
+        .then(({ data: products, error }) => {
+            if (error) throw error;
+
+            currentProducts = products || [];
 
             // Update stats
             renderStatsDashboard();
@@ -333,7 +350,7 @@ function loadInventory() {
             }
         })
         .catch(error => {
-            console.error("Firestore read error:", error);
+            console.error("Supabase read error:", error);
             showToast("Database fetch failed: " + error.message, "error");
         });
 }
@@ -425,9 +442,13 @@ function renderInventoryTable(products) {
 function toggleProductListed(id, listed, inputElement) {
     const label = inputElement.parentElement.nextElementSibling;
     
-    window.db.collection("products").doc(id)
+    window.supabaseClient
+        .from("products")
         .update({ listed: listed })
-        .then(() => {
+        .eq("id", id)
+        .then(({ error }) => {
+            if (error) throw error;
+
             if (listed) {
                 label.textContent = "SHOW";
                 label.className = "status-label listed";
@@ -465,10 +486,6 @@ function openEditProductModal(id) {
     document.getElementById("prodCategory").value = prod.category ? prod.category.toLowerCase() : "necklace";
     document.getElementById("prodDesc").value = prod.description || "";
     
-    // Image URL
-    const urlInput = document.getElementById("prodImageUrl");
-    if (urlInput) urlInput.value = prod.imageUrl || "";
-
     // Listed status
     const checkbox = document.getElementById("prodListed");
     checkbox.checked = prod.listed;
@@ -521,52 +538,39 @@ async function saveProduct() {
         let imageUrl = currentUploadedImageUrl || "assets/necklace.jpg"; // Default placeholder if new product
 
         if (file) {
-            // Must upload image to Firebase Storage
-            if (!window.storage) {
-                throw new Error("Firebase Storage is not initialized. Please verify your config.");
+            if (!window.supabaseClient) {
+                throw new Error("Supabase Client is not initialized. Please verify your config.");
             }
 
             if (progressContainer) progressContainer.style.display = "block";
-            if (progressBar) progressBar.style.width = "0%";
+            if (progressBar) progressBar.style.width = "10%";
 
-            try {
-                const storageRef = window.storage.ref().child(`products/${Date.now()}_${file.name}`);
-                
-                // Wrap uploadTask in a Promise to await it cleanly
-                imageUrl = await new Promise((resolve, reject) => {
-                    const uploadTask = storageRef.put(file);
-                    uploadTask.on("state_changed", 
-                        (snapshot) => {
-                            const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                            if (progressBar) progressBar.style.width = `${percent}%`;
-                        },
-                        (error) => {
-                            reject(new Error("Firebase Storage upload failed: " + error.message));
-                        },
-                        () => {
-                            uploadTask.snapshot.ref.getDownloadURL()
-                                .then(url => resolve(url))
-                                .catch(err => reject(new Error("Failed to get download URL: " + err.message)));
-                        }
-                    );
+            const filePath = `products/${Date.now()}_${file.name}`;
+            
+            // Upload to Supabase Storage Bucket
+            const { data: uploadData, error: uploadError } = await window.supabaseClient.storage
+                .from("jewellery-images")
+                .upload(filePath, file, {
+                    cacheControl: "3600",
+                    upsert: false
                 });
-            } catch (storageErr) {
-                // Check if this looks like a storage disabled / configuration / upgrade error
-                const isConfigError = storageErr.message.includes("configuration-not-found") || 
-                                      storageErr.message.includes("no default bucket") || 
-                                      storageErr.message.includes("billing") || 
-                                      storageErr.message.includes("Blaze");
-                if (isConfigError) {
-                    throw new Error("Firebase Cloud Storage is not activated. Please upgrade your Firebase project to the Blaze plan to enable file uploads, or submit without selecting an image.");
-                } else {
-                    throw storageErr;
-                }
-            } finally {
-                if (progressContainer) progressContainer.style.display = "none";
+
+            if (progressBar) progressBar.style.width = "70%";
+
+            if (uploadError) {
+                throw new Error("Supabase Storage upload failed: " + uploadError.message);
             }
+
+            // Get public downloadable URL
+            const { data: publicUrlData } = window.supabaseClient.storage
+                .from("jewellery-images")
+                .getPublicUrl(filePath);
+
+            imageUrl = publicUrlData.publicUrl;
+            if (progressBar) progressBar.style.width = "100%";
         }
 
-        // Save Firestore Document
+        // Save to Supabase DB Table
         const productData = {
             name,
             referenceCode: ref,
@@ -577,17 +581,24 @@ async function saveProduct() {
             description,
             listed,
             imageUrl: imageUrl,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            updatedAt: new Date().toISOString()
         };
 
         if (id) {
-            // Edit Spec
-            await window.db.collection("products").doc(id).update(productData);
+            // Update
+            const { error } = await window.supabaseClient
+                .from("products")
+                .update(productData)
+                .eq("id", id);
+            if (error) throw error;
             showToast("Jewellery details updated successfully", "success");
         } else {
-            // Create New Product
-            productData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-            await window.db.collection("products").add(productData);
+            // Insert
+            productData.createdAt = new Date().toISOString();
+            const { error } = await window.supabaseClient
+                .from("products")
+                .insert([productData]);
+            if (error) throw error;
             showToast("New jewellery piece added to inventory", "success");
         }
 
@@ -600,6 +611,7 @@ async function saveProduct() {
     } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Product';
+        if (progressContainer) progressContainer.style.display = "none";
     }
 }
 
@@ -610,18 +622,27 @@ function deleteProductItem(id) {
     const confirmDelete = confirm(`Are you sure you want to permanently delete "${prod.name}" (Ref: ${prod.referenceCode || 'IJ-Custom'})?`);
     if (!confirmDelete) return;
 
-    window.db.collection("products").doc(id)
+    window.supabaseClient
+        .from("products")
         .delete()
-        .then(() => {
+        .eq("id", id)
+        .then(({ error }) => {
+            if (error) throw error;
             showToast("Jewellery item removed from database", "success");
             
-            // Delete image from storage if it is a Firebase Storage URL
-            if (prod.imageUrl && prod.imageUrl.includes("firebasestorage.googleapis.com")) {
+            // Try to remove image from Supabase Storage bucket if it is a Supabase Storage path
+            if (prod.imageUrl && prod.imageUrl.includes("/storage/v1/object/public/jewellery-images/")) {
                 try {
-                    const storageRef = window.storage.refFromURL(prod.imageUrl);
-                    storageRef.delete()
-                        .then(() => console.log("Associated image file deleted from storage."))
-                        .catch(err => console.warn("Failed to delete storage file:", err));
+                    // Extract filepath from public URL
+                    const parts = prod.imageUrl.split("/jewellery-images/");
+                    if (parts.length > 1) {
+                        const filePath = decodeURIComponent(parts[1]);
+                        window.supabaseClient.storage
+                            .from("jewellery-images")
+                            .remove([filePath])
+                            .then(() => console.log("Associated storage file removed."))
+                            .catch(err => console.warn("Failed to delete storage file:", err));
+                    }
                 } catch (e) {
                     console.warn("Could not parse image URL for storage deletion:", e);
                 }
@@ -639,31 +660,36 @@ function deleteProductItem(id) {
 function seedDatabaseWithDefaults() {
     const seedBtn = document.getElementById("seedDbBtn");
     
-    const confirmSeed = confirm("Do you want to initialize the Firestore database with the 8 default showcase items now? This will reset default items but will not duplicate them.");
+    const confirmSeed = confirm("Do you want to initialize the database with the 8 default showcase items now? This will reset default items but will not duplicate them.");
     if (!confirmSeed) return;
 
     seedBtn.disabled = true;
     seedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Seeding database...';
 
-    const dbBatch = window.db.batch();
+    const records = defaultShowcaseSeed.map(item => ({
+        name: item.name,
+        referenceCode: item.referenceCode,
+        category: item.category,
+        metalPurity: item.metalPurity,
+        estimatedWeight: item.estimatedWeight,
+        description: item.description,
+        imageUrl: item.imageUrl,
+        basePrice: item.basePrice,
+        listed: item.listed,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    }));
 
-    defaultShowcaseSeed.forEach(item => {
-        // Use the product's unique reference code as the document ID in Firestore to prevent duplicates
-        const docRef = window.db.collection("products").doc(item.referenceCode);
-        dbBatch.set(docRef, {
-            ...item,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    });
-
-    dbBatch.commit()
-        .then(() => {
+    window.supabaseClient
+        .from("products")
+        .upsert(records, { onConflict: "referenceCode" })
+        .then(({ error }) => {
+            if (error) throw error;
             showToast("Showcase database seeded successfully without duplicates!", "success");
             loadInventory();
         })
         .catch(err => {
-            console.error("Seeding commit error:", err);
+            console.error("Seeding error:", err);
             showToast("Seeding failed: " + err.message, "error");
             seedBtn.disabled = false;
             seedBtn.innerHTML = '<i class="fas fa-database"></i> Seed Default Catalog';
@@ -856,12 +882,15 @@ function initSidebarNavigation() {
 }
 
 function loadSiteSettingsForm() {
-    if (!window.firebaseConfigured || !window.db) return;
+    if (!window.supabaseConfigured || !window.supabaseClient) return;
 
-    window.db.collection("settings").doc("site").get()
-        .then(doc => {
-            if (doc.exists) {
-                const data = doc.data();
+    window.supabaseClient
+        .from("settings")
+        .select("*")
+        .eq("key", "site")
+        .single()
+        .then(({ data, error }) => {
+            if (!error && data) {
                 document.getElementById("settingsSiteName").value = data.websiteName || "IKRAM JEWELLERS";
                 
                 const logoPreview = document.getElementById("settingsLogoPreviewBox");
@@ -891,53 +920,54 @@ function loadSiteSettingsForm() {
         });
 }
 
-function uploadSettingsFile(file, type) {
+async function uploadSettingsFile(file, type) {
     const isLogo = type === "logo";
     const progressBar = document.getElementById(isLogo ? "logoUploadProgressBar" : "iconUploadProgressBar");
     const progressContainer = document.getElementById(isLogo ? "logoUploadProgressContainer" : "iconUploadProgressContainer");
     const previewBox = document.getElementById(isLogo ? "settingsLogoPreviewBox" : "settingsIconPreviewBox");
 
-    if (!window.storage) {
-        showToast("Firebase Storage is not initialized. Please verify your config.", "error");
+    if (!window.supabaseClient) {
+        showToast("Supabase Client is not initialized. Please verify your config.", "error");
         return;
     }
 
     if (progressContainer) progressContainer.style.display = "block";
-    if (progressBar) progressBar.style.width = "0%";
+    if (progressBar) progressBar.style.width = "10%";
 
     try {
-        const storageRef = window.storage.ref().child(`products/settings_${type}_${Date.now()}`);
-        const uploadTask = storageRef.put(file);
+        const filePath = `settings/settings_${type}_${Date.now()}`;
+        
+        const { data, error } = await window.supabaseClient.storage
+            .from("jewellery-images")
+            .upload(filePath, file, {
+                cacheControl: "3600",
+                upsert: true
+            });
 
-        uploadTask.on("state_changed", 
-            snapshot => {
-                const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                if (progressBar) progressBar.style.width = pct + "%";
-            }, 
-            error => {
-                console.error("Upload error:", error);
-                showToast("Upload failed: " + error.message + ". Please ensure your Firebase Storage bucket is activated in the console.", "error");
-                if (progressContainer) progressContainer.style.display = "none";
-            }, 
-            () => {
-                uploadTask.snapshot.ref.getDownloadURL()
-                    .then(url => {
-                        previewBox.innerHTML = `<img src="${url}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">`;
-                        previewBox.dataset.url = url;
-                        if (progressContainer) progressContainer.style.display = "none";
-                        showToast(`${isLogo ? "Logo" : "Favicon"} uploaded successfully. Click Save to publish!`, "success");
-                    })
-                    .catch(err => {
-                        console.error("URL retrieval error:", err);
-                        showToast("Failed to resolve URL: " + err.message, "error");
-                        if (progressContainer) progressContainer.style.display = "none";
-                    });
-            }
-        );
+        if (progressBar) progressBar.style.width = "70%";
+
+        if (error) throw error;
+
+        const { data: publicUrlData } = window.supabaseClient.storage
+            .from("jewellery-images")
+            .getPublicUrl(filePath);
+
+        const url = publicUrlData.publicUrl;
+        if (progressBar) progressBar.style.width = "100%";
+
+        previewBox.innerHTML = `<img src="${url}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">`;
+        previewBox.dataset.url = url;
+        showToast(`${isLogo ? "Logo" : "Favicon"} uploaded successfully. Click Save to publish!`, "success");
+
     } catch (e) {
         console.error("Upload settings exception:", e);
-        showToast("Cloud Storage error: " + e.message + ". Cloud Storage is likely disabled in Firebase Console.", "error");
-        if (progressContainer) progressContainer.style.display = "none";
+        showToast("Upload failed: " + e.message, "error");
+    } finally {
+        if (progressContainer) {
+            setTimeout(() => {
+                progressContainer.style.display = "none";
+            }, 1000);
+        }
     }
 }
 
@@ -955,50 +985,74 @@ function saveSiteSettingsForm() {
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
-    window.db.collection("settings").doc("site").set({
-        websiteName: siteName,
-        logoUrl: logoUrl,
-        brandIconUrl: brandIconUrl,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-        showToast("Website Settings updated successfully!", "success");
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
-    })
-    .catch(err => {
-        console.error("Save site settings error:", err);
-        showToast("Save failed: " + err.message, "error");
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
-    });
-}// 11. Load Admin Header Site Settings
+    window.supabaseClient
+        .from("settings")
+        .upsert({
+            key: "site",
+            websiteName: siteName,
+            logoUrl: logoUrl,
+            brandIconUrl: brandIconUrl,
+            updatedAt: new Date().toISOString()
+        })
+        .then(({ error }) => {
+            if (error) throw error;
+            showToast("Website Settings updated successfully!", "success");
+        })
+        .catch(err => {
+            console.error("Save site settings error:", err);
+            showToast("Save failed: " + err.message, "error");
+        })
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        });
+}
+
+// 11. Load Admin Header Site Settings
 let adminSettingsListener = null;
 function loadAdminSiteSettings() {
-    if (!window.firebaseConfigured || !window.db) return;
+    if (!window.supabaseConfigured || !window.supabaseClient) return;
+
+    window.supabaseClient
+        .from("settings")
+        .select("*")
+        .eq("key", "site")
+        .single()
+        .then(({ data, error }) => {
+            if (!error && data) {
+                updateAdminHeaderUI(data);
+            }
+        });
 
     if (adminSettingsListener) {
-        adminSettingsListener(); // Unsubscribe first
+        window.supabaseClient.removeChannel(adminSettingsListener);
     }
 
-    adminSettingsListener = window.db.collection("settings").doc("site")
-        .onSnapshot(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                if (data.websiteName) {
-                    const logoMains = document.querySelectorAll(".admin-logo .logo-main");
-                    logoMains.forEach(el => {
-                        el.textContent = data.websiteName;
-                    });
-                }
-                if (data.logoUrl) {
-                    const logoImgs = document.querySelectorAll(".admin-logo img");
-                    logoImgs.forEach(el => {
-                        el.src = data.logoUrl;
-                    });
+    adminSettingsListener = window.supabaseClient
+        .channel("admin_settings_realtime")
+        .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "settings", filter: "key=eq.site" },
+            (payload) => {
+                if (payload.new) {
+                    updateAdminHeaderUI(payload.new);
                 }
             }
-        }, error => {
-            console.error("Firestore admin settings load error:", error);
+        )
+        .subscribe();
+}
+
+function updateAdminHeaderUI(data) {
+    if (data.websiteName) {
+        const logoMains = document.querySelectorAll(".admin-logo .logo-main");
+        logoMains.forEach(el => {
+            el.textContent = data.websiteName;
         });
+    }
+    if (data.logoUrl) {
+        const logoImgs = document.querySelectorAll(".admin-logo img");
+        logoImgs.forEach(el => {
+            el.src = data.logoUrl;
+        });
+    }
 }
