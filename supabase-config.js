@@ -2,8 +2,8 @@
 // Ikram Jewellers - Supabase Configuration & Initialization
 // ==========================================================================
 
-const SUPABASE_URL = "YOUR_SUPABASE_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_URL = "https://dbtrfagaioawahpsefbc.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRidHJmYWdhaW9hd2FocHNlZmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczMjU2NjgsImV4cCI6MjEwMjkwMTY2OH0.TBdmaGTm8wpjEBHofuTe9OGt_B3m927IhKt4za7N_g8";
 
 // Check if credentials have been updated from placeholder defaults
 const isConfigured = 
