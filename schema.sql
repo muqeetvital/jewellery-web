@@ -2,17 +2,11 @@
 -- Ikram Jewellers - Supabase PostgreSQL Database Schema
 -- ==========================================================================
 
--- 1. CLEANUP EXPORTED OBJECTS
-drop policy if exists "Allow public read access to products" on public.products;
-drop policy if exists "Allow admin write access to products" on public.products;
-drop policy if exists "Allow public read access to settings" on public.settings;
-drop policy if exists "Allow admin write access to settings" on public.settings;
-drop policy if exists "Allow select own user" on public.users;
-drop policy if exists "Allow admin all access to users" on public.users;
+-- 1. CLEANUP EXPORTED TABLES (automatically drops associated policies)
+drop table if exists public.products cascade;
+drop table if exists public.settings cascade;
+drop table if exists public.users cascade;
 
-drop table if exists public.products;
-drop table if exists public.settings;
-drop table if exists public.users;
 
 -- 2. CREATE PRODUCTS TABLE
 create table public.products (
